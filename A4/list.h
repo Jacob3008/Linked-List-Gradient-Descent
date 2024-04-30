@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -11,59 +12,74 @@ struct Node {
 
 class List {
 public:
-	void createList(double);
+	void createList(float, float, float, int);
 	void display(bool);
+	double getError();
 private:
-	Node* head = NULL;
+	Node* head = nullptr;
+	Node* tail = nullptr;
+	int nodes = 0;
+	double error = NULL;
 };
 
-void List::createList(double newdata) {
+void List::createList(float x, float b, float s, int n) {
 	Node* newnode = new Node;
 
-	newnode->next = NULL;
+	newnode->next = nullptr;
 	
 	// if list is empty
-	if (head == NULL) {
-		newnode->data = newdata;
-		newnode->prev = NULL;
+	if (head == nullptr) {
+		newnode->data = abs(tanh(x) - b);
+		newnode->prev = nullptr;
 		head = newnode;
+		nodes++;
 
-		// repeat if data is greater than 0.5
-		if (newdata > 0.5)
-			createList(newdata);
+		// repeat if there are more hidden nodes
+		if (nodes < n)
+			createList(x, b, s, n);
 		return;
 	}
 	
 	// find next empty node
 	Node* temp = head;
-	while (temp->next != NULL) {
+	while (temp->next != nullptr) {
 		temp = temp->next;
 	}
 	newnode->prev = temp;
 	temp->next = newnode;
 
-	// set new data and repeat if value is greater than 0.5
-	newnode->data = temp->data * 0.5;
-	if (newnode->data > 0.5)
-		createList(newnode->data);
+	// set new data and repeat if there are more hidden nodes
+	newnode->data = temp->data * s;
+	nodes++;
+	if (nodes < n)
+		createList(x, b, s * 10, n);
+	else {
+		error = newnode->data;
+		tail = newnode;
+	}
+		
 }
 
 void List::display(bool reverse) {
-	Node* ptr = head;
+	Node* ptr;
 
-	// set head to last element
-	if (reverse) {
-		while (ptr->next != NULL)
-			ptr = ptr->next;
-	}
+	// set ptr to either tail or head
+	if (reverse)
+		ptr = tail;
+	else
+		ptr = head;
 
 	// display all nodes
-	while (ptr != NULL) {
-		cout << ptr->data << " -> ";
+	while (ptr != nullptr) {
+		cout << setprecision(6) << fixed << ptr->data << " -> ";
 		if (reverse)
 			ptr = ptr->prev;
 		else
 			ptr = ptr->next;
 	}
-	cout << endl;
+	cout << "nullptr" << endl;
+}
+
+double List::getError() {
+	return error;
 }
